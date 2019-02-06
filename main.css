@@ -59,7 +59,9 @@ a {
 }
 #content {
 	background-color: #404040;
-	height: 1000px;
+	min-height: 1000px;
+	margin-bottom: 500px;
+	padding-bottom: 50px;
 }
 .body {
 	margin-left: 50px;
@@ -84,4 +86,17 @@ a {
 #spoilers:hover {
 	background-color: #404040;
 	color:#FFFFFF;
+}
+.game-screenshot {
+	margin-left: 50px;
+	width: 700px;
+	margin-right: 50px;
+}
+.game-screenshot-spoiler {
+	width: 700px;
+	opacity: 0;
+	transition: 0.5s;
+}
+.game-screenshot-spoiler:hover {
+	opacity: 1;
 }
