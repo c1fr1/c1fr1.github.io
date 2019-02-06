@@ -1,0 +1,87 @@
+#title {
+	font-size: 75px;
+	font-family: Courier, monospace;
+	color: #0C1F41;
+	margin:auto;
+	position: relative;
+	text-align: center;
+	font-weight: bold;
+}
+#center-container {
+	margin: auto;
+	position: relative;
+	width:800px;
+	height:100px;
+	background-color: #C1C1C1;
+}
+#dropdown-section {
+	color:#FFFFFF;
+	background-color: #AAAAAA;
+	border-width: 5px;
+	height: 30px;
+	width: 30%;
+	overflow: hidden;
+	transition: 0.5s;
+	z-index: 100;
+	position: absolute;
+}
+#dropdown-section:hover {
+	height: 230px;
+	margin-bottom:-200; 
+	z-index: 100;
+}
+#dropdown-title {
+	text-align: center;
+	font-size: 25px;
+	height: 30px;
+	z-index: 100;
+}
+#dropdown-item {
+	padding-top: 10px;
+	padding-left: 10px;
+	height: 30px;
+	width: inherit;
+	transition: 0.25s;
+	color:#FFFFFF;
+	font-family: Arial;
+	font-weight: bold;
+	z-index: 100;
+}
+#dropdown-item:hover {
+	padding-left: 20px;
+	border-left-style: solid;
+	border-width: 10px;
+	border-color: #000000;
+}
+a {
+	color:inherit;
+	text-decoration: none;
+}
+#content {
+	background-color: #404040;
+	height: 1000px;
+}
+.body {
+	margin-left: 50px;
+	margin-right: 50px;
+	color: #FFFFFF;
+}
+#download {
+	text-align: center;
+	font-family: Courier, monospace;
+	font-size: 50px;
+	color:green;
+	transition: 0.1s;
+}
+#download:hover {
+	font-weight: bold;
+}
+#spoilers {
+	background-color: #000000;
+	color:#000000;
+	transition: 0.5s;
+}
+#spoilers:hover {
+	background-color: #404040;
+	color:#FFFFFF;
+}
