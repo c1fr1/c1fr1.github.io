@@ -169,7 +169,7 @@ function main() {
   const gl = glSetup();
   gl.clear(gl.COLOR_BUFFER_BIT);
   
-  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "clr"], [[], ["extraRed"]]);
+  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "textureCoordinates"], [[], ["extraRed"]]);
   const vao = VAO.makeSquare(gl, 1, 1);
 
   const tex = new Texture(gl, "favicon.png");
