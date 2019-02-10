@@ -119,11 +119,12 @@ class Texture {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
   
     const image = new Image();
+    image.setAttribute('crossorigin', 'anonymous');
     console.log("kek");
     image.onload = function() {
       gl.bindTexture(gl.TEXTURE_2D, id);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  
+
       if ((image.width & (image.width - 1)) == 0 && (image.height & (image.height - 1)) == 0) {
          gl.generateMipmap(gl.TEXTURE_2D);
       } else {
