@@ -51,8 +51,6 @@ class VAO {
     ]
     const indices = [0, 1, 2, 1, 2, 3];
     return new VAO([new VBO(gl, vertices, 2), new VBO(gl, colors, 2)], new IBO(gl, indices), indices.length);
-    /*console.log(vertices);
-    return new VAO([new VBO(gl, vertices, 2)], new IBO(gl, [0, 1, 2, 1, 2 ,3], 6));*/
   }
   prepareRender(gl, program) {
     for (var i = 0; i < this.vbos.length && i < program.attribPositions.length; ++i) {
@@ -124,7 +122,6 @@ class ShaderProgram {
     gl.uniform1i(this.uniformPositions[shader][pos], value);
   }
   setUnifromt(gl, shader, pos, value) {
-    console.log(this.uniformPositions);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, value.id);
     gl.uniform1i(this.uniformPositions[shader][pos], 0);
@@ -177,14 +174,28 @@ function main() {
 
   const tex = new Texture(gl, "favicon.png");
 
-  gl.clear(gl.COLOR_BUFFER_BIT);
   
-  program.enable(gl);
 
-  program.setUnifromt(gl, 1, 0, tex);
+  function render(gl) {
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  
+    program.enable(gl);
 
-  vao.fullRender(gl, program);
+    program.setUnifromt(gl, 1, 0, tex);
 
-  //const tex = new Texture(gl, "favicon.png");
+    vao.fullRender(gl, program);
+  }
+
+  var lastFrameTime = 0;
+  function loop(currentTime) {
+    currentTime *= 0.001;
+    const deltaTime = currentTime - lastFrameTime;
+    lastFrameTime = currentTime;
+
+    render(gl);
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
 }
 main();
