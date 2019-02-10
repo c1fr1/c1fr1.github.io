@@ -12,20 +12,20 @@
 <!-- give the vertex shader the id "[shaderName]-vert", and the fragment shader the id "[shaderName]-frag"-->
 <script type="x-shader/x-vertex" id="normal-vert">
 	attribute vec2 vert;
-    attribute vec3 clr;
+    attribute vec2 textureCoordinates;
 
-    varying lowp vec4 vertColor;
+    varying lowp vec2 texCoord;
 
     void main() {
       gl_Position = vec4(vert.x, vert.y, 0, 1);
-      vertColor = vec4(clr, 1.0);
+      texCoord = textureCoordinates;
     }
 </script>
 <script type="x-shader/x-fragment" id="normal-frag">
-	varying lowp vec4 vertColor;
-
+	varying lowp vec2 texCoord;
+	uniform sampler2D tex;
     void main() {
-      gl_FragColor = vertColor;
+      gl_FragColor = texture2D(tex, texCoord);
     }
 </script>
 <!--script type="module" src="gl-matrix.js"></script-->

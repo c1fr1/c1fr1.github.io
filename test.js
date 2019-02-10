@@ -44,13 +44,13 @@ class VAO {
      width/2, -height/2
     ]
     const colors = [
-    1.0, 1.0, 1.0,
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0
+    1.0, 1.0,
+    1.0, 0.0,
+    0.0, 1.0,
+    0.0, 0.0
     ]
     const indices = [0, 1, 2, 1, 2, 3];
-    return new VAO([new VBO(gl, vertices, 2), new VBO(gl, colors, 3)], new IBO(gl, indices), indices.length);
+    return new VAO([new VBO(gl, vertices, 2), new VBO(gl, colors, 2)], new IBO(gl, indices), indices.length);
     /*console.log(vertices);
     return new VAO([new VBO(gl, vertices, 2)], new IBO(gl, [0, 1, 2, 1, 2 ,3], 6));*/
   }
@@ -71,7 +71,9 @@ class VAO {
 class ShaderProgram {
   //int id;
   //int[] attribPositions;
-  constructor(gl, vert, frag, attribNames) {
+  //int[] vertUniformPositions;
+  //int[] fragUniformPositions;
+  constructor(gl, vert, frag, attribNames, uniformNames) {
     const vertShader = ShaderProgram.loadShader(gl, gl.VERTEX_SHADER, vert);
     const fragShader = ShaderProgram.loadShader(gl, gl.FRAGMENT_SHADER, frag);
 
@@ -85,12 +87,19 @@ class ShaderProgram {
       this.id = -1;
     }
     this.attribPositions = [];
-    for (var i = 0; i < attribNames.length;++i) {
+    for (var i = 0; i < attribNames.length; ++i) {
       this.attribPositions.push(gl.getAttribLocation(this.id, attribNames[i]));
     }
+    this.uniformPositions = [[], []];
+    for (var i = 0; i < uniformNames[0].length; ++i) {
+      this.uniformPositions[0].push(gl.getUniformLocation(this.id, uniformNames[0][i]))
+    }
+    for (var i = 0; i < uniformNames[1].length; ++i) {
+      this.uniformPositions[1].push(gl.getUniformLocation(this.id, uniformNames[1][i]))
+    }
   }
-  static makeProgram(gl, name, attribNames) {
-    return new ShaderProgram(gl, document.querySelector("#" + name + "-vert").textContent, document.querySelector("#" + name + "-frag").textContent, attribNames);
+  static makeProgram(gl, name, attribNames, uniformNames) {
+    return new ShaderProgram(gl, document.querySelector("#" + name + "-vert").textContent, document.querySelector("#" + name + "-frag").textContent, attribNames, uniformNames);
   }
 
   static loadShader(gl, type, source) {
@@ -108,11 +117,22 @@ class ShaderProgram {
   enable(gl) {
     gl.useProgram(this.id);
   }
+  setUniformf(gl, shader, pos, value) {
+    gl.uniform1f(this.uniformPositions[shader][pos], value);
+  }
+  setUniformi(gl, shader, pos, value) {
+    gl.uniform1i(this.uniformPositions[shader][pos], value);
+  }
+  setUnifromt(gl, shader, pos, value) {
+    console.log(this.uniformPositions);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, value.id);
+    gl.uniform1i(this.uniformPositions[shader][pos], 0);
+  }
 }
 
 class Texture {
   //int id;
-  //boolean loaded;
   constructor(gl, url) {
     const id = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, id);
@@ -120,8 +140,7 @@ class Texture {
   
     const image = new Image();
     image.setAttribute('crossorigin', 'anonymous');
-    console.log("kek");
-    image.onload = function() {
+    /*image.onload = function() {
       gl.bindTexture(gl.TEXTURE_2D, id);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
@@ -132,9 +151,8 @@ class Texture {
          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       }
-      console.log("kek");
     };
-    image.src = url;
+    image.src = url;*/
     this.id = id;
   }
 }
@@ -154,15 +172,19 @@ function main() {
   const gl = glSetup();
   gl.clear(gl.COLOR_BUFFER_BIT);
   
-  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "clr"]);
+  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "clr"], [[], ["extraRed"]]);
   const vao = VAO.makeSquare(gl, 1, 1);
+
+  const tex = new Texture(gl, "favicon.png");
 
   gl.clear(gl.COLOR_BUFFER_BIT);
   
   program.enable(gl);
 
+  program.setUnifromt(gl, 1, 0, tex);
+
   vao.fullRender(gl, program);
 
-  const tex = new Texture(gl, "favicon.png");
+  //const tex = new Texture(gl, "favicon.png");
 }
 main();
