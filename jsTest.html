@@ -7,6 +7,26 @@
 <body>
   <canvas id="glCanvas" width="640" height="480"></canvas>
 </body>
+<!-- give the vertex shader the id "[shaderName]-vert", and the fragment shader the id "[shaderName]-frag"-->
+<script type="x-shader/x-vertex" id="normal-vert">
+	attribute vec2 vert;
+    attribute vec3 clr;
+
+    varying lowp vec4 vertColor;
+
+    void main() {
+      gl_Position = vec4(vert.x, vert.y, 0, 1);
+      vertColor = vec4(clr, 1.0);
+    }
+</script>
+<script type="x-shader/x-fragment" id="normal-frag">
+	varying lowp vec4 vertColor;
+
+    void main() {
+      gl_FragColor = vertColor;
+    }
+</script>
+<!--script type="module" src="gl-matrix.js"></script-->
 <script src="test.js"></script>
 </body>
 </html>
