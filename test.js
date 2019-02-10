@@ -140,7 +140,7 @@ class Texture {
   
     const image = new Image();
     image.setAttribute('crossorigin', 'anonymous');
-    /*image.onload = function() {
+    image.onload = function() {
       gl.bindTexture(gl.TEXTURE_2D, id);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
@@ -152,7 +152,7 @@ class Texture {
          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       }
     };
-    image.src = url;*/
+    image.src = url;
     this.id = id;
   }
 }
