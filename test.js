@@ -44,10 +44,10 @@ class VAO {
      width/2, -height/2
     ]
     const colors = [
-    1.0, 1.0,
+    0.0, 0.0,
     1.0, 0.0,
     0.0, 1.0,
-    0.0, 0.0
+    1.0, 1.0
     ]
     const indices = [0, 1, 2, 1, 2, 3];
     return new VAO([new VBO(gl, vertices, 2), new VBO(gl, colors, 2)], new IBO(gl, indices), indices.length);
