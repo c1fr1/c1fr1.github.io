@@ -126,8 +126,15 @@ class ShaderProgram {
     gl.bindTexture(gl.TEXTURE_2D, value.id);
     gl.uniform1i(this.uniformPositions[shader][pos], 0);
   }
+  setUniform4M(gl, shader, pos, value) {
+    gl.uniformMatrix4fv(this.uniformPositions[shader][pos], false, new Float32Array([
+      value.x.x, value.y.x, value.z.x, value.w.x,
+      value.x.y, value.y.y, value.z.y, value.w.y,
+      value.x.z, value.y.z, value.z.z, value.w.z,
+      value.x.w, value.y.w, value.z.w, value.w.w
+      ]))
+  }
 }
-
 class Texture {
   //int id;
   constructor(gl, url) {
@@ -153,6 +160,64 @@ class Texture {
     this.id = id;
   }
 }
+class Vector4f {
+  //float x;
+  //float y;
+  //float z;
+  //float w;
+  constructor(x, y, z, w) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+  }
+}
+class Vector3f {
+  //float x;
+  //float y;
+  //float z;
+  constructor(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+}
+class Vector2f {
+  //float x;
+  //float y;
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+class Matrix4f {
+  //Vector4f x;// [x.x y.x z.x w.x]
+  //Vector4f y;// [x.y y.y z.y w.y]
+  //Vector4f z;// [x.z y.z z.z w.z]
+  //Vector4f w;// [x.w y.w z.w w.w]
+  constructor(xx, yx, zx, wx, xy, yy, zy, wy, xz, yz, zz, wz, xw, yw, zw, ww) {
+    this.x = new Vector4f(xx, xy, xz, xw);
+    this.y = new Vector4f(yx, yy, yz, yw);
+    this.z = new Vector4f(zx, zy, zz, zw);
+    this.w = new Vector4f(wx, wy, wz, ww);
+  }
+  static setOrthographic(width, height, close, far) {
+    return new Matrix4f(
+      2/width, 0       , 0              , 0                           ,
+      0      , 2/height, 0              , 0                           ,
+      0      , 0       , 2/(close - far), -(far + close)/(far - close),
+      0      , 0       , 0              , 1
+      );
+  }
+  static set2D(width, height) {
+    return new Matrix4f(
+      2/width, 0       , 0, 0 ,
+      0      , 2/height, 0, 0 ,
+      0      , 0       , 0, -1,
+      0      , 0       , 0, 1
+      );
+  }
+}
 
 function glSetup() {
   const canvas = document.querySelector("#glCanvas");
@@ -169,12 +234,12 @@ function main() {
   const gl = glSetup();
   gl.clear(gl.COLOR_BUFFER_BIT);
   
-  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "textureCoordinates"], [[], ["extraRed"]]);
+  var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "textureCoordinates"], [["mat"], ["tex"]]);
   const vao = VAO.makeSquare(gl, 1, 1);
 
   const tex = new Texture(gl, "favicon.png");
 
-  
+  const matrix = Matrix4f.set2D(2, 2);
 
   function render(gl) {
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -182,6 +247,8 @@ function main() {
     program.enable(gl);
 
     program.setUnifromt(gl, 1, 0, tex);
+
+    program.setUniform4M(gl, 0, 0, matrix);
 
     vao.fullRender(gl, program);
   }
