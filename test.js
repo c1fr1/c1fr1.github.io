@@ -118,6 +118,15 @@ class ShaderProgram {
   setUniformf(gl, shader, pos, value) {
     gl.uniform1f(this.uniformPositions[shader][pos], value);
   }
+  setUniform2f(gl, shader, pos, value) {
+    gl.uniform2f(this.uniformPositions[shader][pos], new Float32Array([value.x, value.y]));
+  }
+  setUniform3f(gl, shader, pos, value) {
+    gl.uniform3f(this.uniformPositions[shader][pos], new Float32Array([value.x, value.y, value.z]));
+  }
+  setUniform4f(gl, shader, pos, value) {
+    gl.uniform4f(this.uniformPositions[shader][pos], new Float32Array([value.x, value.y, value.z, value.w]));
+  }
   setUniformi(gl, shader, pos, value) {
     gl.uniform1i(this.uniformPositions[shader][pos], value);
   }
@@ -128,10 +137,10 @@ class ShaderProgram {
   }
   setUniform4M(gl, shader, pos, value) {
     gl.uniformMatrix4fv(this.uniformPositions[shader][pos], false, new Float32Array([
-      value.x.x, value.y.x, value.z.x, value.w.x,
-      value.x.y, value.y.y, value.z.y, value.w.y,
-      value.x.z, value.y.z, value.z.z, value.w.z,
-      value.x.w, value.y.w, value.z.w, value.w.w
+      value.x.x, value.x.y, value.x.z, value.x.w,
+      value.y.x, value.y.y, value.y.z, value.y.w,
+      value.z.x, value.z.y, value.z.z, value.z.w,
+      value.w.x, value.w.y, value.w.z, value.w.w
       ]))
   }
 }
@@ -160,7 +169,41 @@ class Texture {
     this.id = id;
   }
 }
-class Vector4f {
+class Vector2 {
+  //float x;
+  //float y;
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  dot(right) {
+    return this.x * right.x + this.y * right.y;
+  }
+}
+class Vector3 {
+  //float x;
+  //float y;
+  //float z;
+  constructor(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+  dot(right) {
+    return this.x * right.x + this.y * right.y + this.z * right.z;
+  }
+  cross(right, target) {
+    if (target == null) {
+      return new Vector3(this.y * right.z, this.z * right.x, this.x * right.y);
+    }else {
+      target.x = this.y * right.z;
+      target.y = this.z * right.x;
+      target.z = this.x * right.y;
+      return target;
+    }
+  }
+}
+class Vector4 {
   //float x;
   //float y;
   //float z;
@@ -171,38 +214,31 @@ class Vector4f {
     this.z = z;
     this.w = w;
   }
-}
-class Vector3f {
-  //float x;
-  //float y;
-  //float z;
-  constructor(x, y, z) {
-    this.x = x;
-    this.y = y;
-    this.z = z;
+  dot(right) {
+    return this.x * right.x + this.y * right.y + this.z * right.z + this.w * right.w;
   }
 }
-class Vector2f {
-  //float x;
-  //float y;
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-}
-class Matrix4f {
-  //Vector4f x;// [x.x y.x z.x w.x]
-  //Vector4f y;// [x.y y.y z.y w.y]
-  //Vector4f z;// [x.z y.z z.z w.z]
-  //Vector4f w;// [x.w y.w z.w w.w]
+class Matrix4 {
+  //Vector4 x;// [x.x y.x z.x w.x]
+  //Vector4 y;// [x.y y.y z.y w.y]
+  //Vector4 z;// [x.z y.z z.z w.z]
+  //Vector4 w;// [x.w y.w z.w w.w]
   constructor(xx, yx, zx, wx, xy, yy, zy, wy, xz, yz, zz, wz, xw, yw, zw, ww) {
-    this.x = new Vector4f(xx, xy, xz, xw);
-    this.y = new Vector4f(yx, yy, yz, yw);
-    this.z = new Vector4f(zx, zy, zz, zw);
-    this.w = new Vector4f(wx, wy, wz, ww);
+    this.x = new Vector4(xx, xy, xz, xw);
+    this.y = new Vector4(yx, yy, yz, yw);
+    this.z = new Vector4(zx, zy, zz, zw);
+    this.w = new Vector4(wx, wy, wz, ww);
+  }
+  static setIdentity() {
+    return new Matrix4(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+      );
   }
   static setOrthographic(width, height, close, far) {
-    return new Matrix4f(
+    return new Matrix4(
       2/width, 0       , 0              , 0                           ,
       0      , 2/height, 0              , 0                           ,
       0      , 0       , 2/(close - far), -(far + close)/(far - close),
@@ -210,17 +246,201 @@ class Matrix4f {
       );
   }
   static set2D(width, height) {
-    return new Matrix4f(
+    return new Matrix4(
       2/width, 0       , 0, 0 ,
       0      , 2/height, 0, 0 ,
       0      , 0       , 0, -1,
       0      , 0       , 0, 1
       );
   }
+  static setPerspective(fov, aspectRatio, minRenderDist, maxRenderDist) {
+    return new Matrix4(
+      1/(aspectRatio * Math.tan(fov/2)), 0, 0, 0,
+      0, 1/(Math.tan(fov/2)), 0, 0,
+      0, 0, (maxRenderDist + minRenderDist)/(minRenderDist - maxRenderDist), 2 * maxRenderDist * minRenderDist/(minRenderDist - maxRenderDist),
+      0, 0, -1, 0
+      );
+  }
+  static setRotationX(theta) {
+    return new Matrix4(
+      1, 0              , 0               , 0,
+      0, Math.cos(theta), -Math.sin(theta), 0,
+      0, Math.sin(theta),  Math.cos(theta), 0,
+      0, 0              , 0               , 1
+      );
+  }
+  static setRotationY(theta) {
+    return new Matrix4(
+       Math.cos(theta), 0, Math.sin(theta), 0,
+      0               , 1, 0              , 0,
+      -Math.sin(theta), 0, Math.cos(theta) , 0,
+      0, 0               , 0              , 1
+      );
+  }
+  static setRotationZ(theta) {
+    return new Matrix4(
+      Math.cos(theta), -Math.sin(theta), 0, 0,
+      Math.sin(theta),  Math.cos(theta), 0, 0,
+      0              , 0               , 1, 0,
+      0              , 0               , 0, 1
+      );
+  }
+  static setTranslationXYZ(dx, dy, dz) {
+    return new Matrix4(
+      1, 0, 0, dx,
+      0, 1, 0, dy,
+      0, 0, 1, dz,
+      0, 0, 0, 1
+      );
+  }
+  static setTranslationX(dx) {
+    return new Matrix4(
+      1, 0, 0, dx,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setTranslationY(dy) {
+    return new Matrix4(
+      1, 0, 0, 0,
+      0, 1, 0, dy,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setTranslationZ(dz) {
+    return new Matrix4(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, dz,
+      0, 0, 0, 1
+      );
+  }
+  static setScale(c) {
+    return new Matrix4(
+      c, 0, 0, 0,
+      0, c, 0, 0,
+      0, 0, c, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setScaleX(c) {
+    return new Matrix4(
+      c, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setScaleY(c) {
+    return new Matrix4(
+      1, 0, 0, 0,
+      0, c, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setScaleZ(c) {
+    return new Matrix4(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, c, 0,
+      0, 0, 0, 1
+      );
+  }
+  static setTranslation(t) {//Vector3 right
+    return setTranslation(t.x, t.y, t.z);
+  }
+  mulV(right, target) {//Vector4 right;
+    target.x = right.x * this.x.x + right.y * this.y.x + right.z * this.z.x + right.w * this.w.x;
+    target.y = right.x * this.x.y + right.y * this.y.y + right.z * this.z.y + right.w * this.w.y;
+    target.z = right.x * this.x.z + right.y * this.y.z + right.z * this.z.z + right.w * this.w.z;
+    target.w = right.x * this.x.w + right.y * this.y.w + right.z * this.z.w + right.w * this.w.w;
+    return target;
+  }
+  mulM(right, target) {//Matrix4 right;
+    if (target == null) {
+      const x = right.mulV(this.x);
+      const y = right.mulV(this.y);
+      const z = right.mulV(this.z);
+      const w = right.mulV(this.w);
+      return new Matrix4(
+        x.x, y.x, z.x, w.x,
+        x.y, y.y, z.y, w.y,
+        x.z, y.z, z.z, w.z,
+        x.w, y.w, z.w, w.w
+        );
+    } else {
+      right.mulV(this.x, target.x);
+      right.mulV(this.y, target.y);
+      right.mulV(this.z, target.z);
+      right.mulV(this.w, target.w);
+      return target;
+    }
+  }
+  rotateX(theta) {
+    this.mulM(Matrix4.setRotationX(theta), this);
+  }
+  rotateY(theta) {
+    this.mulM(Matrix4.setRotationY(theta), this);
+  }
+  rotateZ(theta) {
+    this.mulM(Matrix4.setRotationZ(theta), this);
+  }
+  translateXYZ(dx, dy, dz) {
+    this.mulM(Matrix4.setTranslationXYZ(dx, dy, dz), this);
+  }
+  translateX(dx) {
+    this.mulM(Matrix4.setTranslationX(dx), this);
+  }
+  translateY(dy) {
+    this.mulM(Matrix4.setTranslationY(dy), this);
+  }
+  translateZ(dz) {
+    this.mulM(Matrix4.setTranslationZ(dz), this);
+  }
+  translate(t) {
+    this.mulM(Matrix4.setTranslation(t), this);
+  }
+  scale(c) {
+    this.mulM(Matrix4.setScale(c), this);
+  }
+  scaleX(c) {
+    this.mulM(Matrix4.setScaleX(c), this);
+  }
+  scaleY(c) {
+    this.mulM(Matrix4.setScaleY(c), this);
+  }
+  scaleZ(c) {
+    this.mulM(Matrix4.setScaleZ(c), this);
+  }
+  log() {
+    console.log(
+      "[" + this.x.x + " " + this.y.x + " " + this.z.x + " " + this.w.x + "]\n" +
+      "[" + this.x.y + " " + this.y.y + " " + this.z.y + " " + this.w.y + "]\n" +
+      "[" + this.x.z + " " + this.y.z + " " + this.z.z + " " + this.w.z + "]\n" +
+      "[" + this.x.w + " " + this.y.w + " " + this.z.w + " " + this.w.w + "]\n"
+      )
+  }
+}
+
+function goFullScreen() {
+  if (gl.canvas.requestFullScreen) {
+    gl.canvas.requestFullScreen();
+  } else if (gl.canvas.mozRequestFullScreen) {
+    gl.canvas.mozRequestFullScreen();
+  } else if (gl.canvas.webkitRequestFullScreen) {
+    gl.canvas.webkitRequestFullScreen();
+  } else if (gl.canvas.msRequestFullScreen) {
+    gl.canvas.msRequestFullScreen();
+  }
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 }
 
 function glSetup() {
   const canvas = document.querySelector("#glCanvas");
+
   const gl = canvas.getContext("webgl");
   if (gl === null) {
     alert("Unable to initialize WebGL. Your browser or machine may not support it.");
@@ -230,24 +450,24 @@ function glSetup() {
   return gl;
 }
 
-function main() {
-  const gl = glSetup();
+function main(gl) {
   gl.clear(gl.COLOR_BUFFER_BIT);
   
   var program = ShaderProgram.makeProgram(gl, "normal", ["vert", "textureCoordinates"], [["mat"], ["tex"]]);
-  const vao = VAO.makeSquare(gl, 1, 1);
+  const vao = VAO.makeSquare(gl, 50, 50);
 
   const tex = new Texture(gl, "favicon.png");
 
-  const matrix = Matrix4f.set2D(2, 2);
+  const matrix = Matrix4.set2D(100 * gl.canvas.width / gl.canvas.height, 100);
+  matrix.log();
 
-  function render(gl) {
+  function render(gl, dTime) {
     gl.clear(gl.COLOR_BUFFER_BIT);
   
     program.enable(gl);
 
     program.setUnifromt(gl, 1, 0, tex);
-
+    
     program.setUniform4M(gl, 0, 0, matrix);
 
     vao.fullRender(gl, program);
@@ -259,10 +479,11 @@ function main() {
     const deltaTime = currentTime - lastFrameTime;
     lastFrameTime = currentTime;
 
-    render(gl);
+    render(gl, deltaTime);
 
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 }
-main();
+const gl = glSetup();
+main(gl);
