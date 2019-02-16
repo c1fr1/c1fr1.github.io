@@ -461,14 +461,27 @@ function main(gl) {
   const matrix = Matrix4.set2D(100 * gl.canvas.width / gl.canvas.height, 100);
   matrix.log();
 
-  function render(gl, dTime) {
+  function render(dTime) {
     gl.clear(gl.COLOR_BUFFER_BIT);
   
     program.enable(gl);
 
     program.setUnifromt(gl, 1, 0, tex);
-    
+
     program.setUniform4M(gl, 0, 0, matrix);
+
+    if (keys[65] > 0) {
+      matrix.translateX(-0.01);
+    }
+    if (keys[68] > 0) {
+      matrix.translateX(0.01);
+    }
+    if (keys[87] > 0) {
+      matrix.translateY(0.01);
+    }
+    if (keys[83] > 0) {
+      matrix.translateY(-0.01);
+    }
 
     vao.fullRender(gl, program);
   }
@@ -479,11 +492,32 @@ function main(gl) {
     const deltaTime = currentTime - lastFrameTime;
     lastFrameTime = currentTime;
 
-    render(gl, deltaTime);
+    render(deltaTime);
+
+    for (var i = 0; i < 349; ++i) {
+      if (keys[i] == 2) {
+        --keys[i];
+      }
+    }
 
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
 }
+var keys = new Array(349);
+for (var i = 0; i < 349; ++i) {
+  keys[i] = 0;
+}
+document.addEventListener("keydown", function(event) {
+    if (event.keyCode >= 0 && event.keyCode < 349) {
+      keys[event.keyCode] = 2;
+    }
+
+});
+document.addEventListener("keyup", function(event) {
+    if (event.keyCode >= 0 && event.keyCode < 349) {
+      keys[event.keyCode] = 0;
+    }
+});
 const gl = glSetup();
 main(gl);
