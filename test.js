@@ -194,11 +194,11 @@ class Vector3 {
   }
   cross(right, target) {
     if (target == null) {
-      return new Vector3(this.y * right.z, this.z * right.x, this.x * right.y);
+      return new Vector3(this.y * right.z - this.z * right.y, this.z * right.x - this.x * right.z, this.x * right.y - this.y * right.x);
     }else {
-      target.x = this.y * right.z;
-      target.y = this.z * right.x;
-      target.z = this.x * right.y;
+      target.x = this.y * right.z - this.z * right.y;
+      target.y = this.z * right.x - this.x * right.z;
+      target.z = this.x * right.y - this.y * right.x;
       return target;
     }
   }
