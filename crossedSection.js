@@ -20,7 +20,7 @@ class IBO {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.id);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
   }
-  bind(gl) {
+  bind() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.id);
   }
 }
@@ -43,27 +43,43 @@ class VAO {
     -width/2, -height/2,
      width/2, -height/2
     ]
-    const colors = [
+    const textCoords = [
     0.0, 0.0,
     1.0, 0.0,
     0.0, 1.0,
     1.0, 1.0
     ]
     const indices = [0, 1, 2, 1, 2, 3];
-    return new VAO([new VBO(vertices, 2), new VBO(colors, 2)], new IBO(indices), indices.length);
+    return new VAO([new VBO(vertices, 2), new VBO(textCoords, 2)], new IBO(indices), indices.length);
+  }
+  static makeTranslatedSquare(x, y, width, height) {
+    const vertices = [
+    x - width/2, y + height/2,
+    x + width/2, y + height/2,
+    x - width/2, y - height/2,
+    x + width/2, y - height/2
+    ]
+    const textCoords = [
+    0.0, 0.0,
+    1.0, 0.0,
+    0.0, 1.0,
+    1.0, 1.0
+    ]
+    const indices = [0, 1, 2, 1, 2, 3];
+    return new VAO([new VBO(vertices, 2), new VBO(textCoords, 2)], new IBO(indices), indices.length);
   }
   prepareRender(program) {
     for (var i = 0; i < this.vbos.length && i < program.attribPositions.length; ++i) {
       this.vbos[i].bind(program.attribPositions[i]);
     }
-    this.ibo.bind(gl);
+    this.ibo.bind();
   }
-  draw(gl) {
+  draw() {
     gl.drawElements(gl.TRIANGLES, this.indexCount, gl.UNSIGNED_SHORT, 0);
   }
   fullRender(program) {
     this.prepareRender(program);
-    this.draw(gl);
+    this.draw();
   }
 }
 class ShaderProgram {
@@ -105,7 +121,7 @@ class ShaderProgram {
     gl.shaderSource(id, source);
     gl.compileShader(id);
     if (!gl.getShaderParameter(id, gl.COMPILE_STATUS)) {
-      alert("An error occurred compiling shader with type: " + type + "error: " + gl.getShaderInfoLog(vertShader));
+      alert("An error occurred compiling shader with type: " + type + "error: " + gl.getShaderInfoLog(id));
       gl.deleteShader(id);
       this.id = -1;
       return;
@@ -125,7 +141,7 @@ class ShaderProgram {
     gl.uniform3f(this.uniformPositions[shader][pos], new Float32Array([value.x, value.y, value.z]));
   }
   setUniform4f(shader, pos, value) {
-    gl.uniform4f(this.uniformPositions[shader][pos], new Float32Array([value.x, value.y, value.z, value.w]));
+    gl.uniform4f(this.uniformPositions[shader][pos],value.x, value.y, value.z, value.w);
   }
   setUniformi(shader, pos, value) {
     gl.uniform1i(this.uniformPositions[shader][pos], value);
@@ -176,8 +192,32 @@ class Vector2 {
     this.x = x;
     this.y = y;
   }
+  add(right, target) {
+    if (target == null) {
+      return new Vector2(this.x + right.x, this.y + right.y);
+    } else {
+      target.x = this.x + right.x;
+      target.y = this.y + right.y;
+      return target;
+    }
+  }
+  sub(right, target) {
+    if (target == null) {
+      return new Vector2(this.x - right.x, this.y - right.y);
+    } else {
+      target.x = this.x - right.x;
+      target.y = this.y - right.y;
+      return target;
+    }
+  }
   dot(right) {
     return this.x * right.x + this.y * right.y;
+  }
+  getLengthSquared() {
+    return this.x * this.x + this.y * this.y;
+  }
+  getLength() {
+    return Math.sqrt(this.getLengthSquared());
   }
 }
 class Vector3 {
@@ -188,6 +228,26 @@ class Vector3 {
     this.x = x;
     this.y = y;
     this.z = z;
+  }
+  add(right, target) {
+    if (target == null) {
+      return new Vector2(this.x + right.x, this.y + right.y, this.z + right.z);
+    } else {
+      target.x = this.x + right.x;
+      target.y = this.y + right.y;
+      target.z = this.z + right.z;
+      return target;
+    }
+  }
+  sub(right, target) {
+    if (target == null) {
+      return new Vector2(this.x - right.x, this.y - right.y, this.z - right.z);
+    } else {
+      target.x = this.x - right.x;
+      target.y = this.y - right.y;
+      target.z = this.z - right.z;
+      return target;
+    }
   }
   dot(right) {
     return this.x * right.x + this.y * right.y + this.z * right.z;
@@ -202,6 +262,12 @@ class Vector3 {
       return target;
     }
   }
+  getLengthSquared() {
+    return this.x * this.x + this.y * this.y + this.z * this.z;
+  }
+  getLength() {
+    return Math.sqrt(this.getLengthSquared());
+  }
 }
 class Vector4 {
   //float x;
@@ -214,8 +280,36 @@ class Vector4 {
     this.z = z;
     this.w = w;
   }
+  add(right, target) {
+    if (target == null) {
+      return new Vector2(this.x + right.x, this.y + right.y, this.z + right.z, this.w + right.w);
+    } else {
+      target.x = this.x + right.x;
+      target.y = this.y + right.y;
+      target.z = this.z + right.z;
+      target.w = this.w + right.w;
+      return target;
+    }
+  }
+  sub(right, target) {
+    if (target == null) {
+      return new Vector2(this.x - right.x, this.y - right.y, this.z - right.z, this.w - right.w);
+    } else {
+      target.x = this.x - right.x;
+      target.y = this.y - right.y;
+      target.z = this.z - right.z;
+      target.w = this.w - right.w;
+      return target;
+    }
+  }
   dot(right) {
     return this.x * right.x + this.y * right.y + this.z * right.z + this.w * right.w;
+  }
+  getLengthSquared() {
+    return this.x * this.x + this.y * this.y + this.z * this.z + this.w *  this.w;
+  }
+  getLength() {
+    return Math.sqrt(this.getLengthSquared());
   }
 }
 class Matrix4 {
@@ -228,6 +322,14 @@ class Matrix4 {
     this.y = new Vector4(yx, yy, yz, yw);
     this.z = new Vector4(zx, zy, zz, zw);
     this.w = new Vector4(wx, wy, wz, ww);
+  }
+  static copy(other) {
+    return new Matrix4(
+      other.x.x, other.y.x, other.z.x, other.w.x,
+      other.x.y, other.y.y, other.z.y, other.w.y,
+      other.x.z, other.y.z, other.z.z, other.w.z,
+      other.x.w, other.y.w, other.z.w, other.w.w
+      );
   }
   static setIdentity() {
     return new Matrix4(
@@ -353,11 +455,19 @@ class Matrix4 {
     return setTranslation(t.x, t.y, t.z);
   }
   mulV(right, target) {//Vector4 right;
-    target.x = right.x * this.x.x + right.y * this.y.x + right.z * this.z.x + right.w * this.w.x;
-    target.y = right.x * this.x.y + right.y * this.y.y + right.z * this.z.y + right.w * this.w.y;
-    target.z = right.x * this.x.z + right.y * this.y.z + right.z * this.z.z + right.w * this.w.z;
-    target.w = right.x * this.x.w + right.y * this.y.w + right.z * this.z.w + right.w * this.w.w;
-    return target;
+    if (target != null) {
+      target.x = right.x * this.x.x + right.y * this.y.x + right.z * this.z.x + right.w * this.w.x;
+      target.y = right.x * this.x.y + right.y * this.y.y + right.z * this.z.y + right.w * this.w.y;
+      target.z = right.x * this.x.z + right.y * this.y.z + right.z * this.z.z + right.w * this.w.z;
+      target.w = right.x * this.x.w + right.y * this.y.w + right.z * this.z.w + right.w * this.w.w;
+      return target;
+    } else {
+      const x = right.x * this.x.x + right.y * this.y.x + right.z * this.z.x + right.w * this.w.x;
+      const y = right.x * this.x.y + right.y * this.y.y + right.z * this.z.y + right.w * this.w.y;
+      const z = right.x * this.x.z + right.y * this.y.z + right.z * this.z.z + right.w * this.w.z;
+      const w = right.x * this.x.w + right.y * this.y.w + right.z * this.z.w + right.w * this.w.w;
+      return new Vector4(x, y, z, w);
+    }
   }
   mulM(right, target) {//Matrix4 right;
     if (target == null) {
@@ -372,48 +482,52 @@ class Matrix4 {
         x.w, y.w, z.w, w.w
         );
     } else {
-      right.mulV(this.x, target.x);
-      right.mulV(this.y, target.y);
-      right.mulV(this.z, target.z);
-      right.mulV(this.w, target.w);
+      const x = right.mulV(this.x);
+      const y = right.mulV(this.y);
+      const z = right.mulV(this.z);
+      const w = right.mulV(this.w);
+      target.x = x;
+      target.y = y;
+      target.z = z;
+      target.w = w;
       return target;
     }
   }
   rotateX(theta) {
-    this.mulM(Matrix4.setRotationX(theta), this);
+    return this.mulM(Matrix4.setRotationX(theta), this);
   }
   rotateY(theta) {
-    this.mulM(Matrix4.setRotationY(theta), this);
+    return this.mulM(Matrix4.setRotationY(theta), this);
   }
   rotateZ(theta) {
-    this.mulM(Matrix4.setRotationZ(theta), this);
+    return this.mulM(Matrix4.setRotationZ(theta), this);
   }
   translateXYZ(dx, dy, dz) {
-    this.mulM(Matrix4.setTranslationXYZ(dx, dy, dz), this);
+    return this.mulM(Matrix4.setTranslationXYZ(dx, dy, dz), this);
   }
   translateX(dx) {
-    this.mulM(Matrix4.setTranslationX(dx), this);
+    return this.mulM(Matrix4.setTranslationX(dx), this);
   }
   translateY(dy) {
-    this.mulM(Matrix4.setTranslationY(dy), this);
+    return this.mulM(Matrix4.setTranslationY(dy), this);
   }
   translateZ(dz) {
-    this.mulM(Matrix4.setTranslationZ(dz), this);
+    return this.mulM(Matrix4.setTranslationZ(dz), this);
   }
   translate(t) {
-    this.mulM(Matrix4.setTranslation(t), this);
+    return this.mulM(Matrix4.setTranslation(t), this);
   }
   scale(c) {
-    this.mulM(Matrix4.setScale(c), this);
+    return this.mulM(Matrix4.setScale(c), this);
   }
   scaleX(c) {
-    this.mulM(Matrix4.setScaleX(c), this);
+    return this.mulM(Matrix4.setScaleX(c), this);
   }
   scaleY(c) {
-    this.mulM(Matrix4.setScaleY(c), this);
+    return this.mulM(Matrix4.setScaleY(c), this);
   }
   scaleZ(c) {
-    this.mulM(Matrix4.setScaleZ(c), this);
+    return this.mulM(Matrix4.setScaleZ(c), this);
   }
   log() {
     console.log(
@@ -424,7 +538,6 @@ class Matrix4 {
       )
   }
 }
-
 function goFullScreen() {
   if (gl.canvas.requestFullScreen) {
     gl.canvas.requestFullScreen();
@@ -435,22 +548,24 @@ function goFullScreen() {
   } else if (gl.canvas.msRequestFullScreen) {
     gl.canvas.msRequestFullScreen();
   }
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 }
-
 function glSetup() {
-  const canvas = document.querySelector("#glCanvas");
 
   const gl = canvas.getContext("webgl");
   if (gl === null) {
     alert("Unable to initialize WebGL. Your browser or machine may not support it.");
     return;
   }
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clearColor(0.1, 0.1, 0.1, 1.0);
   return gl;
 }
 
+const canvas = document.querySelector("#glCanvas");
 var keys = new Array(349);
+var mouseLeft = 0;
+var mouseRight = 0;
+var clientX = 0.0;
+var clientY = 0.0;
 for (var i = 0; i < 349; ++i) {
   keys[i] = 0;
 }
@@ -465,8 +580,156 @@ document.addEventListener("keyup", function(event) {
       keys[event.keyCode] = 0;
     }
 });
+canvas.addEventListener("mousedown", function(event) {
+  if (event.which == 1) {
+    mouseLeft = 3;
+  }else if (event.which == 3) {
+    mouseRight = 3;
+  }
+});
+canvas.addEventListener("mouseup", function(event) {
+  if (event.which == 1) {
+    mouseLeft = 1;
+  }else if (event.which == 3) {
+    mouseRight = 1;
+  }
+});
+
+canvas.onmousemove = (function(event) {
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width > 721) {
+    console.log("fullscreen");
+    const aspectRatio = rect.width / rect.height;
+    if (aspectRatio > 1.5) {
+      //width > height
+      const difference = (rect.width - 1.5 * rect.height) / 2;
+
+      clientX = 2 * (event.pageX - rect.left - difference) / (1.5 * rect.height) - 1;
+      clientY = -2 * (event.pageY - rect.top) / rect.height + 1;
+    } else {
+      const difference = (rect.height - (2 / 3) * rect.width) / 2;
+
+      clientX = 2 * (event.pageX - rect.left) / (1.5 * rect.height) - 1;
+      clientY = -2 * (event.pageY - rect.top - difference) / ((2 / 3) * rect.width) + 1;
+    }
+  } else {
+    clientX = 2 * (event.pageX - rect.left) / rect.width - 1;
+    clientY = -2 * (event.pageY - rect.top) / rect.height + 1;
+  }
+});
 
 //start program
+
+class Line {
+  //Vector2 a;
+  //Vector2 b;
+  //Vector2 delta;
+  //int intersections;
+  constructor(a, b, lines) {
+    if (lines == null) {
+      this.intersections = 0;
+      this.a = a;
+      this.b = b;
+      this.delta = b.sub(a);
+    } else {
+      this.a = a;
+      this.b = b;
+      this.delta = b.sub(a);
+      this.intersections = 0;
+      for (var i = 0; i < lines.length; ++i) {
+        if (this.intersectsWith(lines[i])) {
+          if (lines[i].intersections < 2) {
+            ++this.intersections;
+            ++lines[i].intersections;
+          } else {
+            lines[i].remove(lines, i);
+            lines.splice(i, 1);
+            --i;
+          }
+        }
+      }
+    }
+  }
+  static createNew(a, lines) {
+    const b = new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height, clientY * 50);
+    if (Line.countIntersections(a, b, lines) < 3) {
+      return new Line(a, b, lines);
+    }
+  }
+  static checkIntersectPoints(a, b, c, d) {
+    const abT = ((d.x - c.x) * (c.y - a.y) + (a.x - c.x) * (d.y - c.y)) / ((d.x - c.x) * (b.y - a.y) - (b.x - a.x) * (d.y - c.y));
+    const cdT = ((b.x - a.x) * (a.y - c.y) + (c.x - a.x) * (b.y - a.y)) / ((b.x - a.x) * (d.y - c.y) - (d.x - c.x) * (b.y - a.y));
+    if (abT > 0) {
+      if (cdT > 0) {
+        if (abT < 1) {
+          if (cdT < 1) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  static checkIntersectLines(a, b) {
+    const abT = (b.delta.x * (b.a.y - a.a.y) + b.delta.y * (a.a.x - b.a.x)) / (b.delta.x * a.delta.y - b.delta.y * a.delta.x);
+    const cdT = (a.delta.x * (a.a.y - b.a.y) + a.delta.y * (b.a.x - a.a.x)) / (a.delta.x * b.delta.y - a.delta.y * b.delta.x);
+    if (abT > 0) {
+      if (cdT > 0) {
+        if (abT < 1) {
+          if (cdT < 1) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  static countIntersections(a, b, lines) {
+    var ret = 0;
+    for (var i = 0; i < lines.length; ++i) {
+      if (Line.checkIntersectPoints(a, b, lines[i].a, lines[i].b)) {
+        ++ret;
+      }
+    }
+    return ret;
+  }
+  intersectsWith(other) {
+    return Line.checkIntersectLines(this, other);
+  }
+  render(vao, mat, shader) {
+    //scale rotate translate
+    var nmat = Matrix4.setIdentity();
+    nmat.scaleX(this.delta.getLength());
+    nmat.rotateZ(Math.atan2(this.delta.y, this.delta.x));
+    nmat.translateXYZ(this.a.x, this.a.y, 0);
+    nmat.mulM(mat, nmat);
+    shader.setUniform4M(0, 0, nmat);
+    if (this.intersections >= 0) {
+      shader.setUniform4f(1, 0, new Vector4(this.intersections / 2, 1 - this.intersections / 2, 0, 1));
+    } else {
+      shader.setUniform4f(1, 0, new Vector4(0, 0, 1 - this.intersections / 5, 1));
+    }
+    vao.draw();
+  }
+  remove(lines) {
+    for (var i = 0; i < lines.length; ++i) {
+      if (this.intersectsWith(lines[i])) {
+        --lines[i].intersections;
+      }
+    }
+  }
+  static renderTemp(a, vao, mat, shader) {
+    var nmat = Matrix4.setIdentity();
+    const delta = new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height - a.x, clientY * 50 - a.y);
+    nmat.scaleX(delta.getLength());
+    nmat.rotateZ(Math.atan2(delta.y, delta.x));
+    nmat.translateXYZ(a.x, a.y, 0);
+    nmat.mulM(mat, nmat);
+    shader.setUniform4M(0, 0, nmat);
+    shader.setUniform4f(1, 0, new Vector4(0, 1, 0, 1));
+    vao.draw();
+  }
+}
 
 const gl = glSetup();
 main();
@@ -475,44 +738,39 @@ main();
 function main() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   
-  var program = ShaderProgram.makeProgram("normal", ["vert", "textureCoordinates"], [["mat"], ["tex"]]);
-  const vao = VAO.makeSquare(50, 50);
+  var program = ShaderProgram.makeProgram("color", ["vert"], [["mat"], ["clr"]]);
+  var firstVector = new Vector2(0, 0);
+  var lineList = [];
+  const vao = VAO.makeTranslatedSquare(0.5, 0, 1, 1);
 
-  const tex = new Texture("favicon.png");
-
-  const matrix = Matrix4.set2D(100 * gl.canvas.width / gl.canvas.height, 100);
-  matrix.log();
+  const matrix = Matrix4.setOrthographic(100 * gl.canvas.width / gl.canvas.height, 100, 0, 1);
 
   function render(dTime) {
-    gl.clear(gl.COLOR_BUFFER_BIT);
-  
+
+    if (mouseLeft == 1) {
+      var n = Line.createNew(firstVector, lineList);
+      if (n != null) {
+        lineList.push(n);
+        firstVector = lineList[lineList.length - 1].b;
+      }
+    }
+    
     program.enable();
-
-    program.setUnifromt(1, 0, tex);
-
-    program.setUniform4M(0, 0, matrix);
-
-    if (keys[65] > 0) {
-      matrix.translateX(-0.01);
+    vao.prepareRender(program);
+    Line.renderTemp(firstVector, vao, matrix, program);
+    for (var i = 0; i < lineList.length; ++i) {
+      lineList[i].render(vao, matrix, program);
     }
-    if (keys[68] > 0) {
-      matrix.translateX(0.01);
-    }
-    if (keys[87] > 0) {
-      matrix.translateY(0.01);
-    }
-    if (keys[83] > 0) {
-      matrix.translateY(-0.01);
-    }
-
-    vao.fullRender(program);
   }
 
   var lastFrameTime = 0;
   function loop(currentTime) {
+
     currentTime *= 0.001;
     const deltaTime = currentTime - lastFrameTime;
     lastFrameTime = currentTime;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
     render(deltaTime);
 
@@ -520,6 +778,12 @@ function main() {
       if (keys[i] == 2) {
         --keys[i];
       }
+    }
+    if (mouseLeft % 2 == 1) {
+      --mouseLeft;
+    }
+    if (mouseRight % 2 == 1) {
+      --mouseRight;
     }
 
     requestAnimationFrame(loop);

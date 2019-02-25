@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Crossed Section</title>
+	<link rel="shortcut icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+<body style="margin:0">
+  <button onclick="goFullScreen();" style="background-image: url('fullScreenIcon.svg');width:50px;height:50px;position:absolute;left:660px;top:420px;border:solid white"></button>
+  <canvas id="glCanvas" width="720" height="480"></canvas>
+</body>
+<!-- give the vertex shader the id "[shaderName]-vert", and the fragment shader the id "[shaderName]-frag"-->
+<script type="x-shader/x-vertex" id="normal-vert">
+	uniform mat4 mat;
+
+	attribute vec2 vert;
+  attribute vec2 textureCoordinates;
+
+  varying lowp vec2 texCoord;
+
+  void main() {
+    gl_Position = mat * vec4(vert.x, vert.y, 0, 1);
+    texCoord = textureCoordinates;
+  }
+</script>
+<script type="x-shader/x-fragment" id="normal-frag">
+	varying lowp vec2 texCoord;
+	uniform sampler2D tex;
+  void main() {
+    gl_FragColor = texture2D(tex, texCoord);
+  }
+</script>
+<script type="x-shader/x-vertex" id="color-vert">
+  precision highp float;
+  uniform mat4 mat;
+
+  attribute vec2 vert;
+
+  void main() {
+    gl_Position = mat * vec4(vert.x, vert.y, 0, 1);
+  }
+</script>
+<script type="x-shader/x-fragment" id="color-frag">
+  precision highp float;
+  uniform vec4 clr;
+
+  void main() {
+    gl_FragColor = clr;
+  }
+</script>
+<!--script type="module" src="gl-matrix.js"></script-->
+<script src="crossedSection.js"></script>
+</html>
