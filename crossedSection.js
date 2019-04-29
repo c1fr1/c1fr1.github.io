@@ -210,6 +210,35 @@ class Vector2 {
       return target;
     }
   }
+  scale(factor, target) {
+    if (target == null) {
+      return new Vector2(this.x * factor, this.y * factor);
+    } else {
+      target.x = this.x * factor;
+      target.y = this.y * factor;
+      return target
+    }
+  }
+  normalize(target) {
+    const length = this.getLength();
+    if (target == null) {
+      return new Vector2(this.x / length, this.y / length);
+    }else {
+      target.x = this.x / length;
+      target.y = this.y / length;
+      return target;
+    }
+  }
+  resize(size, target) {
+    const length = size / this.getLength();
+    if (target == null) {
+      return new Vector2(length * this.x, length * this.y);
+    }else {
+      target.x = lenght * this.x;
+      target.y = length * this.y;
+      return target;
+    }
+  }
   dot(right) {
     return this.x * right.x + this.y * right.y;
   }
@@ -218,6 +247,15 @@ class Vector2 {
   }
   getLength() {
     return Math.sqrt(this.getLengthSquared());
+  }
+  linearlyInterpolate(other, t, target) {
+    if (target == null) {
+      return new Vector2(this.x + (other.x - this.x) * t, this.y + (other.y - this.y) * t);
+    }else {
+      target.x = this.x + (other.x - this.x) * t;
+      target.y = this.y + (other.y - this.y) * t;
+      return target;
+    }
   }
 }
 class Vector3 {
@@ -249,6 +287,38 @@ class Vector3 {
       return target;
     }
   }
+  scale(factor, target) {
+    if (target == null) {
+      return new Vector2(this.x * factor, this.y * factor, this.z * factor);
+    } else {
+      target.x = this.x * factor;
+      target.y = this.y * factor;
+      target.z = this.z * factor;
+      return target
+    }
+  }
+  normalize(target) {
+    const length = this.getLength();
+    if (target == null) {
+      return new Vector2(this.x / length, this.y / length, this.z / length);
+    }else {
+      target.x = this.x / length;
+      target.y = this.y / length;
+      target.z = this.z / length;
+      return target;
+    }
+  }
+  resize(size, target) {
+    const length = size / this.getLength();
+    if (target == null) {
+      return new Vector2(length * this.x, length * this.y, length * this.z);
+    }else {
+      target.x = length * this.x;
+      target.y = length * this.y;
+      target.z = length * this.z;
+      return target;
+    }
+  }
   dot(right) {
     return this.x * right.x + this.y * right.y + this.z * right.z;
   }
@@ -267,6 +337,16 @@ class Vector3 {
   }
   getLength() {
     return Math.sqrt(this.getLengthSquared());
+  }
+  linearlyInterpolate(other, t, target) {
+    if (target == null) {
+      return new Vector2(this.x + (other.x - this.x) * t, this.y + (other.y - this.y) * t, this.z + (other.z - this.z) * t);
+    }else {
+      target.x = this.x + (other.x - this.x) * t;
+      target.y = this.y + (other.y - this.y) * t;
+      target.z = this.z + (other.z - this.z) * t;
+      return target;
+    }
   }
 }
 class Vector4 {
@@ -302,6 +382,41 @@ class Vector4 {
       return target;
     }
   }
+  scale(factor, target) {
+    if (target == null) {
+      return new Vector2(this.x * factor, this.y * factor, this.z * factor, this.w * factor);
+    } else {
+      target.x = this.x * factor;
+      target.y = this.y * factor;
+      target.z = this.z * factor;
+      target.w = this.w * factor;
+      return target
+    }
+  }
+  normalize(target) {
+    const length = this.getLength();
+    if (target == null) {
+      return new Vector2(this.x / length, this.y / length, this.z / length, this.w / length);
+    }else {
+      target.x = this.x / length;
+      target.y = this.y / length;
+      target.z = this.z / length;
+      target.w = this.w / length;
+      return target;
+    }
+  }
+  resize(size, target) {
+    const length = size / this.getLength();
+    if (target == null) {
+      return new Vector2(length * this.x, length * this.y, length * this.z, length * this.w);
+    }else {
+      target.x = length * this.x;
+      target.y = length * this.y;
+      target.z = length * this.z;
+      target.w = length * this.w;
+      return target;
+    }
+  }
   dot(right) {
     return this.x * right.x + this.y * right.y + this.z * right.z + this.w * right.w;
   }
@@ -310,6 +425,17 @@ class Vector4 {
   }
   getLength() {
     return Math.sqrt(this.getLengthSquared());
+  }
+  linearlyInterpolate(other, t, target) {
+    if (target == null) {
+      return new Vector2(this.x + (other.x - this.x) * t, this.y + (other.y - this.y) * t, this.z + (other.z - this.z) * t, this.w + (other.w - this.w) * t);
+    }else {
+      target.x = this.x + (other.x - this.x) * t;
+      target.y = this.y + (other.y - this.y) * t;
+      target.z = this.z + (other.z - this.z) * t;
+      target.w = this.w + (other.w - this.w) * t;
+      return target;
+    }
   }
 }
 class Matrix4 {
@@ -529,6 +655,22 @@ class Matrix4 {
   scaleZ(c) {
     return this.mulM(Matrix4.setScaleZ(c), this);
   }
+  linearlyInterpolate(other, t, target) {
+    if (target == null) {
+      return new Matrix4(
+        this.x.x + (other.x.x - this.x.x) * t, this.y.x + (other.y.x - this.y.x) * t, this.z.x + (other.z.x - this.z.x) * t, this.w.x + (other.w.x - this.w.x) * t,
+        this.x.y + (other.x.y - this.x.y) * t, this.y.y + (other.y.y - this.y.y) * t, this.z.y + (other.z.y - this.z.y) * t, this.w.y + (other.w.y - this.w.y) * t,
+        this.x.z + (other.x.z - this.x.z) * t, this.y.z + (other.y.z - this.y.z) * t, this.z.z + (other.z.z - this.z.z) * t, this.w.z + (other.w.z - this.w.z) * t,
+        this.x.w + (other.x.w - this.x.w) * t, this.y.w + (other.y.w - this.y.w) * t, this.z.w + (other.z.w - this.z.w) * t, this.w.w + (other.w.w - this.w.w) * t,
+        );
+    }else {
+      this.x.linearlyInterpolate(other.x, t, target.x);
+      this.y.linearlyInterpolate(other.y, t, target.y);
+      this.z.linearlyInterpolate(other.z, t, target.z);
+      this.w.linearlyInterpolate(other.w, t, target.w);
+      return target;
+    }
+  }
   log() {
     console.log(
       "[" + this.x.x + " " + this.y.x + " " + this.z.x + " " + this.w.x + "]\n" +
@@ -650,10 +792,29 @@ class Line {
       }
     }
   }
-  static createNew(a, lines) {
-    const b = new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height, clientY * 50);
+  static createNew(a, lines, cx, cy) {
+    var b = new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height - cx, clientY * 50 - cy);
+    var delta = b.sub(a);
+    const length = delta.getLength();
+    if (length > 30) {
+      b = a.add(delta.scale(30 / length));
+    }
     if (Line.countIntersections(a, b, lines) < 3) {
       return new Line(a, b, lines);
+    }
+  }
+  static createRandom(centerX, centerY, lines) {
+    const angle = 2 * Math.PI * Math.random();
+    const fx = Math.random() * 600 + centerX - 300;
+    const fy = Math.random() * 600 + centerY - 300;
+    const distance = Math.random() * 25 + 25;
+    const lx = fx + Math.cos(angle) * distance;
+    const ly = fy + Math.sin(angle) * distance;
+    return new Line(new Vector2(fx, fy), new Vector2(lx, ly), lines);
+  }
+  static createRandoms(num, centerX, centerY, lines) {
+    for (var i = 0; i < num; ++i) {
+      lines.push(Line.createRandom(centerX, centerY, lines));
     }
   }
   static checkIntersectPoints(a, b, c, d) {
@@ -718,16 +879,36 @@ class Line {
       }
     }
   }
-  static renderTemp(a, vao, mat, shader) {
+  static renderTemp(a, vao, mat, shader, lines) {
     var nmat = Matrix4.setIdentity();
-    const delta = new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height - a.x, clientY * 50 - a.y);
+    const delta = new Vector2((clientX - mat.w.x) * 50 * gl.canvas.width / gl.canvas.height - a.x, (clientY - mat.w.y) * 50 - a.y);
+
+    var length = delta.getLength();
+    if (length > 30) {
+      delta.scale(30 / length, delta);
+    }
+
     nmat.scaleX(delta.getLength());
     nmat.rotateZ(Math.atan2(delta.y, delta.x));
     nmat.translateXYZ(a.x, a.y, 0);
     nmat.mulM(mat, nmat);
     shader.setUniform4M(0, 0, nmat);
-    shader.setUniform4f(1, 0, new Vector4(0, 1, 0, 1));
+
+    const b = a.add(delta);
+    if (Line.countIntersections(a, b, lines) < 3) {
+      shader.setUniform4f(1, 0, new Vector4(0, 1, 0, 1));
+    } else {
+      shader.setUniform4f(1, 0, new Vector4(0.7, 0.7, 0.7, 1));
+    }
     vao.draw();
+  }
+  static renderLines(a, vao, mat, shader, lines) {
+    shader.enable();
+    vao.prepareRender(shader);
+    Line.renderTemp(a, vao, mat, shader, lines);
+    for (var i = 0; i < lines.length; ++i) {
+      lines[i].render(vao, mat, shader);
+    }
   }
 }
 
@@ -740,26 +921,43 @@ function main() {
   
   var program = ShaderProgram.makeProgram("color", ["vert"], [["mat"], ["clr"]]);
   var firstVector = new Vector2(0, 0);
+  var intersections = 0;
   var lineList = [];
+  Line.createRandoms(200, 0, 0, lineList);
+  for (var i = 0; i < lineList.length; ++i) {
+    console.log(lineList.b);
+  }
   const vao = VAO.makeTranslatedSquare(0.5, 0, 1, 1);
 
-  const matrix = Matrix4.setOrthographic(100 * gl.canvas.width / gl.canvas.height, 100, 0, 1);
+  const perspectiveMatrix = Matrix4.setOrthographic(100 * gl.canvas.width / gl.canvas.height, 100, 0, 1);
+  var translationMatrix = Matrix4.setIdentity();
 
   function render(dTime) {
 
+    const targetPos = firstVector.linearlyInterpolate(new Vector2(clientX * 50 * gl.canvas.width / gl.canvas.height - translationMatrix.w.x, clientY * 50 - translationMatrix.w.y), 0.25); 
+
+    var targetCam = Matrix4.setTranslationXYZ(-targetPos.x, -targetPos.y, 0);
+    translationMatrix.linearlyInterpolate(targetCam, 0.05, translationMatrix);
+
+    const totalMatrix = translationMatrix.mulM(perspectiveMatrix);
+
     if (mouseLeft == 1) {
-      var n = Line.createNew(firstVector, lineList);
+      const size = lineList.length;
+      var n = Line.createNew(firstVector, lineList, translationMatrix.w.x, translationMatrix.w.y);
+      intersections -= (size - lineList.length) * 2
+      console.log(intersections - lineList.length);
       if (n != null) {
         lineList.push(n);
         firstVector = lineList[lineList.length - 1].b;
+        intersections += n.intersections;
       }
-    }
-    
+    }//create line
+
     program.enable();
     vao.prepareRender(program);
-    Line.renderTemp(firstVector, vao, matrix, program);
+    Line.renderTemp(firstVector, vao, totalMatrix, program, lineList);
     for (var i = 0; i < lineList.length; ++i) {
-      lineList[i].render(vao, matrix, program);
+      lineList[i].render(vao, totalMatrix, program);
     }
   }
 
