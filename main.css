@@ -27,7 +27,7 @@
 	position: absolute;
 }
 .dropdown-section:hover {
-	height: 230px;
+	height: 270px;
 	margin-bottom:-200; 
 	z-index: 100;
 }
